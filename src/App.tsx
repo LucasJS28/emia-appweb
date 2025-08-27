@@ -7,21 +7,22 @@ import './App.css';
 export default function App() {
   const [tasks, setTasks] = useState<Task[]>([]);
 
-  // Cargar tareas al iniciar la app
   useEffect(() => {
     getTasks().then(setTasks);
   }, []);
 
-  // Agregar nueva tarea
   const handleAdd = async (title: string) => {
     const newTask = await createTask(title);
     setTasks([...tasks, newTask]);
   };
 
-  // Cambiar estado de completada al hacer click
-  const handleToggleCompleted = async (task: Task) => {
-    const updatedTask = await updateTask(task.id, !task.completed);
-    setTasks(tasks.map(t => (t.id === updatedTask.id ? updatedTask : t)));
+  const handleToggle = async (task: Task) => {
+    try {
+      const updated = await updateTask(task.id, !task.completed);
+      setTasks(tasks.map(t => (t.id === task.id ? updated : t)));
+    } catch (error) {
+      console.error('Error actualizando tarea:', error);
+    }
   };
 
   return (
@@ -37,14 +38,13 @@ export default function App() {
           </tr>
         </thead>
         <tbody>
-          {tasks.map((task) => (
+          {tasks.map(task => (
             <tr key={task.id}>
               <td>{task.id}</td>
               <td>{task.title}</td>
               <td
-                className="completed-cell"
-                style={{ cursor: 'pointer', textAlign: 'center' }}
-                onClick={() => handleToggleCompleted(task)}
+                style={{ cursor: 'pointer' }}
+                onClick={() => handleToggle(task)}
               >
                 {task.completed ? '✅' : '❌'}
               </td>
